@@ -7,10 +7,11 @@ import (
 	"crypto/subtle"
 )
 
-const pinIterations = 120000
+// PINIterations is the PBKDF2 cost. Tests lower it to keep the suite fast; never change it in production code.
+var PINIterations = 120000
 
 func hashPIN(pin string, salt []byte) []byte {
-	k, err := pbkdf2.Key(sha256.New, pin, salt, pinIterations, 32)
+	k, err := pbkdf2.Key(sha256.New, pin, salt, PINIterations, 32)
 	if err != nil {
 		panic(err)
 	}

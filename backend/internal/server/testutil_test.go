@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Mykelsown/apapo-backend/internal/app"
 	"github.com/Mykelsown/apapo-backend/internal/config"
 )
 
@@ -142,4 +143,62 @@ func previewBody(amountNaira int64, rec map[string]any) map[string]any {
 	return map[string]any{"amount_kobo": amountNaira * naira, "recipient": rec}
 }
 
-func init() { log.SetOutput(io.Discard) }
+func init() {
+	log.SetOutput(io.Discard)
+	app.PINIterations = 1000
+}
+
+func execBody(amountNaira int64, rec map[string]any, pin string) map[string]any {
+	b := previewBody(amountNaira, rec)
+	b["pin"] = pin
+	return b
+}
+
+// pay runs execute with a fresh idempotency key.
+func (e *env) pay(token string, body map[string]any, key string) reply {
+	e.t.Helper()
+	return e.call("POST", "/api/splitpay/execute", token, body, "Idempotency-Key", key)
+}
+
+func (e *env) total(token string) float64 {
+	e.t.Helper()
+	return e.call("GET", "/api/dashboard", token, nil).Body["total_balance_kobo"].(float64)
+}
+
+func (e *env) accountID(token, bank string) string {
+	e.t.Helper()
+	for _, a := range e.call("GET", "/api/accounts", token, nil).Body["accounts"].([]any) {
+		m := a.(map[string]any)
+		if m["bank_code"] == bank {
+			return m["id"].(string)
+		}
+	}
+	e.t.Fatalf("no %s account", bank)
+	return ""
+}
+
+func (e *env) balanceOf(token, bank string) float64 {
+	e.t.Helper()
+	for _, a := range e.call("GET", "/api/accounts", token, nil).Body["accounts"].([]any) {
+		m := a.(map[string]any)
+		if m["bank_code"] == bank {
+			return m["balance_kobo"].(float64)
+		}
+	}
+	return -1
+}
+
+func (e *env) fail(account, bank, mode string) {
+	e.t.Helper()
+	if err := e.s.World().SetFailure(account, bank, mode); err != nil {
+		e.t.Fatal(err)
+	}
+}
+
+func legStates(r reply) []string {
+	var out []string
+	for _, l := range r.Body["legs"].([]any) {
+		out = append(out, l.(map[string]any)["state"].(string))
+	}
+	return out
+}
