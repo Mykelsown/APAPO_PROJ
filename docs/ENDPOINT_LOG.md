@@ -188,3 +188,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **When rules apply**: only to credits that arrive in the receiving account AFTER `consent_at` and that the bank has confirmed. Saving rules also makes that account the user's receiving account, so money sent to them by phone lands there and is split.
 - **Errors**: 400 `consent_required`, `invalid_receiving_account`, `too_many_destinations`, `invalid_destination` (`details.index`), `percent_total_exceeds_100`, `invalid_account_number`, `unknown_bank`; 401 `invalid_pin` or `pin_locked` (423); 403 `onboarding_required`; 401.
 - **Frontend must**: show a plain consent sentence with a checkbox ("Apapo may split money I receive in this account as set here"), ask for the PIN, then PUT. Show the "remainder stays in <account>" line using 100 minus the percentages.
+
+## POST /api/splitreceive/scan
+
+- **Who may call**: a signed in user. No body.
+- **What it does**: finds new, bank-confirmed credits in the user's receiving account that arrived after the user gave consent, and splits each by the user's rules. One run per credit, never twice. The same pass also runs by itself every 10 seconds, so the button is only a shortcut.
+- **Returns**: 200 `{count, new_runs:[run]}`. A run is `{id, credit_id, credit_amount_kobo, sender_name, state, sent_kobo, held_kobo, kept_kobo, legs:[{id, kind, label, bank_name, masked_account_number, amount_kobo, state, error?}], created_at}`. `state` is `completed`, or `partial` if some share failed. Leg `state` is `sent` or `failed`.
+- **Never split**: unconfirmed credits, credits from before consent, credits in a different account, and Apapo's own movements (references starting `pay_`, `rev_`, `sr_`). A credit from another Apapo user (a P2P payment) IS split, once, by the receiver's rules; that happens automatically the moment the payment completes.
+- **Errors**: 401.
+- **Frontend must**: show a "Check for new money" button that calls this, then refresh runs and the dashboard. Do not call it in a tight loop.

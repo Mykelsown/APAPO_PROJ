@@ -47,6 +47,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/shield/dismiss` | token | done | Hide the Shield alert for one credit |
 | PUT | `/api/splitreceive/rules` | token + PIN | done | Save the user's Split-Receive rules (needs standing consent) |
 | GET | `/api/splitreceive/rules` | token | done | Read the rules (`{"rules": null}` if none) |
+| POST | `/api/splitreceive/scan` | token | done | Split new confirmed credits now (also runs every 10 seconds) |
 
 ## Common error codes
 

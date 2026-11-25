@@ -230,3 +230,15 @@ func (e *env) bolaRules() (tok string) {
 	}
 	return tok
 }
+
+// credit makes money arrive for the user through the demo helper in the domain, without scanning.
+func (e *env) credit(token string, kobo int64, verified bool) string {
+	e.t.Helper()
+	uid, _ := e.s.World().Authenticate(token)
+	f := false
+	out, err := e.s.World().SimulateCredit(uid, app.SimulateIn{AmountKobo: kobo, Verified: &verified, Scan: &f})
+	if err != nil {
+		e.t.Fatal(err)
+	}
+	return out.CreditID
+}

@@ -28,4 +28,5 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/shield/dismiss", s.authed(s.handleShieldDismiss))
 	mux.HandleFunc("PUT /api/splitreceive/rules", s.authed(s.handlePutRules))
 	mux.HandleFunc("GET /api/splitreceive/rules", s.authed(s.handleGetRules))
+	mux.HandleFunc("POST /api/splitreceive/scan", s.authed(s.handleScan))
 }
