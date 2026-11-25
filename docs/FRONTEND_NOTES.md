@@ -17,7 +17,7 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 
 ## Sign in
 
-- Flow for a new person: `POST /api/auth/otp`, `POST /api/auth/verify-otp`, then (next endpoints) `POST /api/auth/bvn`, `POST /api/auth/pin`.
+- Flow for a new person: `POST /api/auth/otp`, `POST /api/auth/verify-otp`, then `POST /api/auth/bvn`, `POST /api/auth/pin`.
 - Flow for the two demo users: `POST /api/auth/login` with phone and PIN, no code needed.
 - The code is `123456` unless the backend sets `DEV_OTP`. Show a "demo code: 123456" hint in the UI.
 - Show the rate limit as a friendly message using `Retry-After` (seconds).

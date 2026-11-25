@@ -57,6 +57,19 @@ All settings come from environment variables. See `backend/.env.example`.
 | `VERSION` | build value or `dev` | Reported by `/api/health` |
 | `DEMO_ENDPOINTS` | `true` | `false` hides `/api/demo/*` (mock helpers) |
 
+## The API
+
+26 endpoints, all listed in `docs/api-contract.md` with one report per endpoint in `docs/ENDPOINT_LOG.md`.
+Seed users: Samuel `08012345678` PIN `4821` (four banks, N195,000), Bola `08098765432` PIN `5912`. Demo code `123456`.
+
+Walk the whole story against a running server (resets demo data first, ends with "Demo complete."):
+
+```bash
+scripts/demo.sh http://localhost:8080
+```
+
+Frontend developer: start with `docs/FRONTEND_GUIDE.md`. Deploying: `docs/DEPLOY_CONFIRMATION.md`.
+
 ## Deploy on Nobus (Cube)
 
 Nobus builds the image straight from this repository using the `Dockerfile` at the repository root.
@@ -66,7 +79,7 @@ Nobus builds the image straight from this repository using the `Dockerfile` at t
 3. **Deployment Type**: `Standard`.
 4. **Service Configuration**: `Custom Repository`.
    - **Repository URL**: `https://github.com/Mykelsown/APAPO_PROJ`
-   - **Branch**: `APAPO_BACKEND` (or whichever branch holds the finished code)
+   - **Branch**: `APAPO_BACKEND_CLEAN` (the branch that holds the finished code)
    - **Container Port**: `8080`
    - **Git username / token**: only if the repository is private. Type the token into the form only; never write it in any file.
    - Tick **Dockerfile Present**. Leave **Docker Compose Present** unticked.
@@ -108,6 +121,8 @@ backend/cmd/api                                 main program
 backend/internal/...                            config, HTTP helpers, server and features
 docs/api-contract.md                            endpoint table for the frontend
 docs/ENDPOINT_LOG.md                            one report per finished endpoint
-docs/FRONTEND_NOTES.md                          plain notes for the frontend dev
+docs/FRONTEND_GUIDE.md                          what to build, in order (start here)
+docs/FRONTEND_NOTES.md                          plain notes per endpoint
+docs/DEPLOY_CONFIRMATION.md                     how to confirm the live deployment
 scripts/                                        demo script and git hook
 ```

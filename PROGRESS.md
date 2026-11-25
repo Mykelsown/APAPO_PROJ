@@ -1,41 +1,45 @@
 # Apapo backend progress
 
-Branch: `APAPO_BACKEND`. Read this first at the start of any session and continue from the first unchecked item.
+Branch: `APAPO_BACKEND_CLEAN`. Read this first at the start of any session.
 
 ## Done
 
 - [x] P0 setup: module, layout, README, docs, Makefile, .gitignore, .env.example, commit-msg guard hook
-- [x] Section 1: `GET /api/health`, `GET /healthz`, CORS, env config, graceful shutdown, root Dockerfile, .dockerignore, compose. Image built, run, both endpoints curled, HEALTHCHECK reports healthy, `docker stop` drains cleanly, `PROVIDER=real` refused.
+- [x] Section 1: `GET /api/health`, `GET /healthz`, CORS, env config, graceful shutdown, root Dockerfile, compose
+- [x] Section 3 A: otp, verify-otp, bvn, pin, login, me, profile
+- [x] Section 3 B: banks, link, accounts, revoke, dashboard
+- [x] Section 3 C: users lookup
+- [x] Section 3 D: Split-Pay preview, execute (collector, rollback, hold and retry, idempotency), status, payments, recent recipients, P2P by phone
+- [x] Section 3 E: risk check, reports, shield check, shield dismiss
+- [x] Section 3 F: Split-Receive rules, scan, runs and retry, reconciliation
+- [x] Section 3 G: demo simulate-credit, failure, reset
+- [x] Section 4: `scripts/demo.sh` (ends with "Demo complete."), frontend guide, deploy confirmation guide
 
 ## Left
 
-- [ ] GATE: user deploys to Nobus Cube and confirms the frontend reaches `/api/health`. Wait for "continue".
-- [x] Section 3 A: sign in and profile (done: otp, verify-otp, bvn, pin, login, me, profile)
-- [x] Section 3 B: banks and dashboard
-- [x] Section 3 C: people lookup
-- [x] Section 3 D: Split-Pay
-- [x] Section 3 E: Safe Send and Shield
-- [x] Section 3 F: Split-Receive and reconciliation
-- [x] Section 3 G: demo helpers
-- [ ] Section 4: demo script, Docker end-to-end run, final docs
+- [ ] GATE: redeploy the Cube from `APAPO_BACKEND_CLEAN` and run the five checks in `docs/DEPLOY_CONFIRMATION.md`
+- [ ] First real Docker image build happens on the Cube (Docker Hub was blocked where this was built)
+- [ ] Frontend: turn mock mode off and match bank codes (`apex`, `delta`, `savanna`, `harbor`)
 
 ## Decisions
 
-- Local git identity set to Mykelsown for this repo only (it was the tool's default identity). Global config untouched.
-- Go 1.24 standard library only. No third-party modules.
-- CORS: `ALLOWED_ORIGIN=*` echoes any origin (demo convenience); a literal `*` is never sent. No `Allow-Credentials`, since auth is a bearer header, not cookies. Blocked preflight answers 403 `origin_not_allowed`; blocked normal requests are served without CORS headers so the browser blocks them.
-- `APP_SECRET` unset: a random secret is generated per start with a warning (tokens reset on restart).
-- Docker HEALTHCHECK runs the binary itself with `-healthcheck`, so the runtime image needs no curl or wget.
-- Runtime image installs no packages (CA bundle copied from the build stage), so the build needs network only to pull base images.
-- Unknown paths and wrong methods return the standard JSON error (404 `not_found`, 405 `method_not_allowed`).
-- Commit-msg hook lives in `.git/hooks/commit-msg`; a copy is kept in `scripts/commit-msg-hook.sh` (`make hooks` installs it).
+- Fresh code only. The branch `APAPO_BACKEND` also contains a merge of last week's Postgres rehearsal backend (commit c26c9bf). That code is NOT used here. This branch starts from commit 22410e2 (health and Docker) and never merges it.
+- Go 1.24 standard library only. No third party modules. In-memory state behind one lock. Single instance.
+- Money is integer kobo. Error shape `{"error":{"code","message","details"}}`.
+- Tokens: HMAC signed, 24 hours, stateless. PIN: PBKDF2 with per user salt, 5 wrong tries lock for 15 minutes.
+- Collector design: the legs pay into one of the user's own accounts (the largest spendable one), which then sends. Never an Apapo wallet.
+- Hold and retry: a failed reversal leaves the payment `needs_attention`, money safe in the collector, the worker retries every 10 seconds with delays 1s, 2s, 4s (cap 256s), same reference, `human_review` after 10 attempts.
+- A high risk recipient needs `acknowledge_risk: true` on execute (409 otherwise). Shield only warns.
+- A payment to an Apapo user triggers the recipient's Split-Receive scan at once; credits use the `p2p_` reference prefix and are split once. `pay_`, `rev_`, `sr_` are never split.
+- Demo seed ids are fixed (`usr_seed_*`, `acc_seed_*`) so tokens survive `POST /api/demo/reset`.
+- Demo endpoints can be removed with `DEMO_ENDPOINTS=false`.
+- Commits carry no tool attribution; the commit-msg hook rejects it.
 
 ## Errors met
 
-- Docker daemon was not running in the build machine; started `dockerd` manually. Not a project issue.
-- `POST /api/health` returned 404 instead of 405. Cause: a catch-all `/api/` route matched every method. Fix: removed it and converted the mux's own 404 and 405 into JSON.
-- `apk add` failed during `docker build` with a DNS error. Cause: RUN steps in this sandbox have no network. Fix: dropped apk and copied CA certificates from the build stage.
+- Docker Hub blocked in the build environment: the image could not be built there. The identical static Go build was compiled, run, health-checked and put through `scripts/demo.sh`.
+- Wrong test expectations only (planner floor, hold arithmetic). No product bug was found by them.
 
 ## Next step
 
-Wait for "continue" after the Nobus deploy. Then start section 3 A: `POST /api/auth/otp` and `POST /api/auth/verify-otp` (store, tokens, rate limits, seeded users).
+Redeploy the Cube and follow `docs/DEPLOY_CONFIRMATION.md`.
