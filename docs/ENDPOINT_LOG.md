@@ -239,3 +239,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Returns**: 200 `{mode, account_id, bank_code}`.
 - **Errors**: 400 `invalid_mode`, `invalid_target`, `bank_code_required`, `unknown_bank`; 404 `not_found` (unknown account).
 - **Story for the demo**: (1) `insufficient_funds` on the Savanna account, pay N150,000: it rolls back and every balance is restored. (2) Also `reversal_down` on `delta`, pay again: `needs_attention` with a retry countdown. (3) `none` on `delta`: it becomes `rolled_back` within about 10 seconds.
+
+## POST /api/demo/reset (demo only)
+
+- **Who may call**: anyone (no token). Disabled (404) when `DEMO_ENDPOINTS=false`.
+- **Send**: nothing.
+- **Returns**: 200 `{reset: true, message}`.
+- **What it does**: restores the seeded balances and accounts for Samuel and Bola, restores the N80,000 unconfirmed credit and the flagged account, and clears payments, Split-Receive rules and runs, credits, user reports, Shield dismissals and every failure switch. Users created during the demo are removed.
+- **Tokens**: the two seeded users keep their ids, so their tokens stay valid and the app can stay signed in. Anyone else will get 401 `invalid_token` and must sign up again.
+- **Frontend must**: call it from the hidden demo panel and then refetch everything. Run it before every presentation.
