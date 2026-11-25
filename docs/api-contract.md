@@ -38,6 +38,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | GET | `/api/users/lookup?phone=` | token | done | Find another Apapo user by phone, masked name only |
 | POST | `/api/splitpay/preview` | token | done | Plan a payment (legs, fees, risk, warnings). Moves no money |
 | POST | `/api/splitpay/execute` | token + PIN | done | Run a payment. Needs `Idempotency-Key`. Answers 202 |
+| GET | `/api/splitpay/{id}` | token | done | Payment status, legs, reversal retry info. Owner only |
 
 ## Common error codes
 

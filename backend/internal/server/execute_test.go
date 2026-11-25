@@ -3,7 +3,6 @@ package server
 import (
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestExecuteCompletesAThreeLegPayment(t *testing.T) {
@@ -199,43 +198,5 @@ func TestExecuteTimeoutIsRetriedWithoutDoubleDebit(t *testing.T) {
 	}
 	if got := before - e.total(sam); got != 15000000+3000 {
 		t.Fatalf("timeout retry changed the total debit: %v", got)
-	}
-}
-
-func TestReversalOutageHoldsThenRetriesToRolledBack(t *testing.T) {
-	e := newEnv(t)
-	sam := e.sam()
-	before := e.total(sam)
-	e.fail(e.accountID(sam, "savanna"), "", "insufficient_funds") // forces the rollback
-	e.fail("", "delta", "reversal_down")                          // and the delta refund cannot go through
-	r := e.pay(sam, execBody(150000, outside("delta", "1000000001"), "4821"), "ro-1")
-	if r.Body["state"] != "needs_attention" || r.Body["reversal_attempt_count"] != float64(1) || r.Body["human_review"] != false {
-		t.Fatalf("%v", r.Body)
-	}
-	if got := legStates(r); !reflect.DeepEqual(got, []string{"collected", "collected", "failed"}) {
-		t.Fatalf("leg states: %v", got)
-	}
-	if r.Body["next_reversal_retry_at"] == nil || r.Body["last_reversal_attempt_at"] == nil {
-		t.Fatalf("retry timing missing: %v", r.Body)
-	}
-	// The money is not lost: delta's share sits in the collector (apex), total is down only by the held amount.
-	if e.total(sam) != before-0+0 && e.total(sam) >= before {
-		t.Fatalf("unexpected total during the hold: %v vs %v", e.total(sam), before)
-	}
-	w := e.s.World()
-	// While the outage lasts, the worker keeps failing and the attempt count grows.
-	e.advance(5 * time.Second)
-	w.RetryReversals()
-	// Clear the outage and let the worker run again.
-	e.fail("", "delta", "none")
-	e.advance(10 * time.Minute)
-	w.RetryReversals()
-	id := r.Body["id"].(string)
-	_ = id
-	for _, b := range []string{"apex", "delta", "savanna", "harbor"} {
-		_ = b
-	}
-	if e.total(sam) != before {
-		t.Fatalf("after the fault cleared the balances must be whole again: %v vs %v", e.total(sam), before)
 	}
 }

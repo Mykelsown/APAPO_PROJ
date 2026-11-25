@@ -125,3 +125,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Replay**: same key and same body returns the same payment with header `Idempotent-Replay: true` and moves no money. Same key with a different body gives 409 `idempotency_conflict`.
 - **Errors**: 400 `idempotency_key_required` plus every preview error; 401 `invalid_pin` (`details.attempts_left`); 423 `pin_locked` (`details.retry_after_seconds`); 409 `risk_acknowledgement_required` (`details.reasons`) when the recipient is tier `high` and `acknowledge_risk` is not true; 422 `insufficient_funds`.
 - **Frontend must**: generate the key before the PIN screen, disable the button after the tap, show the final state from polling (every 1 to 2 seconds, stop on `completed` or `rolled_back`; keep going slowly on `needs_attention`), and refresh the dashboard afterwards.
+
+## GET /api/splitpay/{id}
+
+- **Who may call**: the user who made the payment. Anyone else gets 404 `not_found`, as if it did not exist.
+- **Returns**: 200 with the same payment object execute returns: `state`, `legs[]` (with `state`), `total_amount_kobo`, `total_fee_kobo`, `recipient` (masked), `failure_reason`, `reversal_attempt_count`, `next_reversal_retry_at`, `last_reversal_attempt_at`, `human_review`.
+- **Polling**: while `state` is `planned`, `collecting` or `sending`, poll every 1 to 2 seconds. `completed` and `rolled_back` are final. `needs_attention` means a refund is being retried: show "Your money is safe, we are putting it back" and keep polling every 10 seconds. `next_reversal_retry_at` is only set in that state. When `human_review` is true show "Our team is looking at this".
+- **Errors**: 404 `not_found`, 401.
+
