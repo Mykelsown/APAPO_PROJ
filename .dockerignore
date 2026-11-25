@@ -1,0 +1,13 @@
+.git
+.gitignore
+frontend
+docs
+scripts
+node_modules
+**/node_modules
+.env
+**/.env
+*.md
+backend/bin
+.idea
+.vscode
