@@ -202,3 +202,5 @@ func legStates(r reply) []string {
 	}
 	return out
 }
+
+const time_hour = time.Hour

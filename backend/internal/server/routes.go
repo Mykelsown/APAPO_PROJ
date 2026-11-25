@@ -24,4 +24,5 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/recipients/recent", s.authed(s.handleRecent))
 	mux.HandleFunc("POST /api/risk/check", s.authed(s.handleRiskCheck))
 	mux.HandleFunc("POST /api/reports", s.authed(s.handleReport))
+	mux.HandleFunc("GET /api/shield/check", s.authed(s.handleShieldCheck))
 }

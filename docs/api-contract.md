@@ -43,6 +43,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | GET | `/api/recipients/recent` | token | done | People the user paid before, masked |
 | POST | `/api/risk/check` | token | done | Safe Send verdict for a recipient (same body as preview) |
 | POST | `/api/reports` | token | done | Report a suspicious outside account (evidence required) |
+| GET | `/api/shield/check?amount_kobo=` | token | done | Warn if the amount is near an unconfirmed credit |
 
 ## Common error codes
 

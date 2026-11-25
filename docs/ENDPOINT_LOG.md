@@ -161,3 +161,13 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Errors**: 400 `evidence_required`; 400 `invalid_account_number` / `unknown_bank` / `bank_not_supported`; 429 `rate_limited` after 5 new reports in 24 hours (`Retry-After` header); 403 `onboarding_required`; 401.
 - **Privacy**: reports are stored only as salted hashes of the account and of the reporter. When 3 different people have reported an account its risk tier becomes `high`.
 - **Frontend must**: offer "Report this account" on the Safe Send warning and after a payment. Treat 200 and 201 as success.
+
+## GET /api/shield/check?amount_kobo=
+
+- **Who may call**: a signed in user.
+- **Query**: `amount_kobo`, a positive integer (the amount the user is about to send).
+- **Returns**: 200 `{"alert": null}` when all is fine, or `{"alert": {credit_id, amount_kobo, sender_name, posted_at, message}}` when the amount is within 10 percent of a credit from the last 24 hours that the bank has NOT confirmed, and that the user has not dismissed. `message` is: "This money has not been confirmed by the bank yet. Wait for confirmation before sending it on."
+- **Ignored on purpose**: Apapo's own movements and credits from other Apapo users, so a normal Apapo payment never triggers Shield.
+- **Seed**: Samuel has an unconfirmed N80,000 credit from "Greenfield Traders", so any amount between N72,000 and N88,000 triggers the alert for him.
+- **Errors**: 400 `invalid_amount`, 401.
+- **Frontend must**: call it when the user changes the amount on the send screen (or just use `shield_warning` from preview, same data). Show a banner with the message and two buttons: "Wait" and "Send anyway". Shield warns; it never blocks.
