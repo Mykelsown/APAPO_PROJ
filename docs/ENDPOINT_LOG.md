@@ -38,3 +38,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Errors**: 400 `invalid_pin_format`; 400 `weak_pin` (0000, 1234, 4321 and repeated digits); 403 `bvn_required`; 409 `pin_already_set`; 401 as usual.
 - **Storage**: PBKDF2 hash with a per user salt. The PIN is never returned or logged.
 - **Frontend must**: ask for the PIN twice on the client (confirm field) and send it once. Wrong PIN rules for payments are on the Split-Pay endpoints.
+
+## POST /api/auth/login
+
+- **Who may call**: anyone. No token.
+- **Send**: `{"phone": "08012345678", "pin": "4821"}`.
+- **Returns**: 200 `{access_token, expires_at, user, onboarding}` (same shape as verify-otp).
+- **Errors**: 401 `invalid_credentials` (wrong PIN, unknown phone, or a user who has not set a PIN yet; all look the same on purpose, wrong PIN adds `details.attempts_left`); 423 `pin_locked` after 5 wrong PINs for 15 minutes (`details.retry_after_seconds` and `Retry-After`); 429 `rate_limited` (per IP).
+- **Demo users**: Samuel `08012345678` PIN `4821`, Bola `08098765432` PIN `5912`.
+- **Frontend must**: use this for returning users instead of the OTP flow. On 423 show a countdown from `retry_after_seconds`.

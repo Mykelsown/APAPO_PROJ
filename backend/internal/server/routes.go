@@ -8,4 +8,5 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/auth/verify-otp", s.authLimited(s.handleVerifyOTP))
 	mux.HandleFunc("POST /api/auth/bvn", s.authed(s.handleBVN))
 	mux.HandleFunc("POST /api/auth/pin", s.authed(s.handlePIN))
+	mux.HandleFunc("POST /api/auth/login", s.authLimited(s.handleLogin))
 }

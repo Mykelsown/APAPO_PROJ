@@ -106,3 +106,5 @@ func mustJSON(v any) []byte {
 	b, _ := json.Marshal(v)
 	return b
 }
+
+const time_minute = time.Minute
