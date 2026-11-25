@@ -41,6 +41,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | GET | `/api/splitpay/{id}` | token | done | Payment status, legs, reversal retry info. Owner only |
 | GET | `/api/payments?limit=&before=` | token | done | The user's payment history, newest first, id cursor |
 | GET | `/api/recipients/recent` | token | done | People the user paid before, masked |
+| POST | `/api/risk/check` | token | done | Safe Send verdict for a recipient (same body as preview) |
 
 ## Common error codes
 

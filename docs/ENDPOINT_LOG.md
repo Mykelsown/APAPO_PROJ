@@ -143,3 +143,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Pay again**: send `recipient: {"recent_id": "<id from this list>"}` to preview or execute. The server finds the real recipient itself, so the frontend never needs a phone number or full account number for a past payee. A foreign or unknown `recent_id` gives 404.
 - **Send money to another Apapo user**: look the person up with `GET /api/users/lookup?phone=`, show the masked name, then preview and execute with `recipient: {"apapo_phone": "..."}`. It is the same Split-Pay flow. The money lands in that person's receiving account; their Split-Receive rules (if any) then split it once.
 - **Frontend must**: use this list for the history screen and the "recent" chips on the send screen.
+
+## POST /api/risk/check
+
+- **Who may call**: a signed in, onboarded user.
+- **Send**: the same body as preview. `amount_kobo` may be `0` when you only want a verdict on the recipient (for example right after the user types an account number). Display fields inside `recipient` are ignored.
+- **Returns**: 200 `{recipient, risk:{tier, reasons[]}, flags[], duplicate_warning}`. `tier` is `low`, `unknown` or `high`. `reasons` are plain sentences that are safe to show. `flags` can be `reported_account`, `name_mismatch`, `first_payment`, `unusual_amount`, `possible_duplicate`.
+- **Rules**: `high` when at least 3 different people reported the account. A clean Apapo user, or a payee with a clean record, can be `low` even on a first payment. Anything else with a flag is `unknown`.
+- **Errors**: 400 `invalid_amount`, `invalid_account_number`, `unknown_bank`, `invalid_recipient`, `invalid_phone`, `self_send`; 403 `onboarding_required`; 404 `not_found`; 401.
+- **Frontend must**: colour the tier (green low, amber unknown, red high) and show `reasons` under the recipient name. For `high`, make the user confirm clearly; execute will then require `acknowledge_risk: true`.
