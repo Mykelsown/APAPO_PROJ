@@ -15,7 +15,7 @@ Branch: `APAPO_BACKEND`. Read this first at the start of any session and continu
 - [x] Section 3 C: people lookup
 - [x] Section 3 D: Split-Pay
 - [x] Section 3 E: Safe Send and Shield
-- [ ] Section 3 F: Split-Receive and reconciliation
+- [x] Section 3 F: Split-Receive and reconciliation
 - [ ] Section 3 G: demo helpers
 - [ ] Section 4: demo script, Docker end-to-end run, final docs
 

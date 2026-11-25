@@ -50,6 +50,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/splitreceive/scan` | token | done | Split new confirmed credits now (also runs every 10 seconds) |
 | GET | `/api/splitreceive/runs` | token | done | The user's splits, newest first, with legs |
 | POST | `/api/splitreceive/runs/{id}/retry` | token | done | Retry the failed shares of one run |
+| GET | `/api/reconciliation` | token | done | Every credit and where each naira went (sent + held + kept = credit) |
 
 ## Common error codes
 

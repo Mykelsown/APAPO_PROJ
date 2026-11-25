@@ -205,3 +205,15 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Shares are independent**: there is no rollback. If one share fails the others still go. A failed leg has `state:"failed"` and an `error` (`insufficient_funds`, `bank_unavailable`, `timeout`, `bank_error`, `destination_unavailable`).
 - **POST retry**: no body. Retries only the failed shares, with the same references, so a share can never be paid twice. Returns 200 `{run}`. If nothing is failed: 409 `nothing_to_retry`. Unknown or foreign id: 404.
 - **Frontend must**: show a "Retry" button on runs with `state:"partial"`. Say "held" in plain words ("still in your Apex account").
+
+## GET /api/reconciliation
+
+- **Who may call**: a signed in user. Only the user's own credits.
+- **Returns**: 200 `{credits:[{credit_id, amount_kobo, sender_name, verified, status, run_id?, sent_kobo, held_kobo, kept_kobo, balanced, posted_at}], totals:{credit_kobo, sent_kobo, kept_kobo, held_kobo}}`, newest credit first.
+- **The rule**: `sent_kobo + held_kobo + kept_kobo = amount_kobo` for every credit, and the same for `totals`. `balanced` says so per credit.
+  - `sent`: left the receiving account to a destination.
+  - `held`: a share that failed and is still in the receiving account, waiting for a retry.
+  - `kept`: the part no rule allocated, or the whole credit if it was not split.
+- **status**: `split`, `partial` (some share held), `not_split` (no rules, before consent, or other account), `waiting_for_bank` (credit not confirmed yet).
+- **Errors**: 401.
+- **Frontend must**: render it as a statement: a row per credit with a stacked bar of sent, held and kept, and a totals row. Show a "Balanced" tick from `balanced`.

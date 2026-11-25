@@ -45,3 +45,10 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 - A `high` recipient needs a clear extra confirmation. Then send `acknowledge_risk: true` with execute; without it execute answers 409 `risk_acknowledgement_required` and moves no money.
 - Shield never blocks. Show its message and let the user decide.
 - Demo path: preview N80,000 for Samuel for the Shield banner; Apex `9000000001` for the red warning.
+
+## Split-Receive screens
+
+- Rules screen: `GET` then `PUT /api/splitreceive/rules` (consent checkbox and PIN).
+- Activity screen: `GET /api/splitreceive/runs` plus a "Check for new money" button (`POST /api/splitreceive/scan`).
+- Statement screen: `GET /api/reconciliation`.
+- To demo a salary arriving, call `POST /api/demo/simulate-credit` (next section), then refresh.
