@@ -1,0 +1,20 @@
+# Secrets: never commit
+.env
+*.env
+!.env.example
+
+# Build output
+backend/bin/
+/bin/
+*.exe
+*.test
+*.out
+coverage.*
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+
+# Frontend (built by the frontend dev in parallel)
+node_modules/
