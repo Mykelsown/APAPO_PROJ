@@ -346,6 +346,9 @@ func (w *World) runPayment(p *Payment) {
 	}
 	p.State = "completed"
 	w.touch(p)
+	if to != nil {
+		w.scanLocked(to.UserID) // the recipient's Split-Receive rules apply to this credit once
+	}
 }
 
 // rollback reverses collected legs in reverse order. If a reversal fails, the payment becomes

@@ -204,3 +204,29 @@ func legStates(r reply) []string {
 }
 
 const time_hour = time.Hour
+
+// pct and fixed build Split-Receive destinations.
+func ownPct(accountID string, p float64) map[string]any {
+	return map[string]any{"account_id": accountID, "percent": p}
+}
+
+func rulesBody(recvID, pin string, dests ...map[string]any) map[string]any {
+	return map[string]any{"receiving_account_id": recvID, "standing_consent": true, "pin": pin, "destinations": dests}
+}
+
+// bolaRules gives Bola the story rules: 30 percent to Savanna savings, 40 percent to Delta spending.
+func (e *env) bolaRules() (tok string) {
+	e.t.Helper()
+	tok = e.bola()
+	for _, b := range []string{"delta", "savanna"} {
+		if r := e.call("POST", "/api/banks/link", tok, linkBody(b)); r.Status != 201 {
+			e.t.Fatalf("link %s: %d %v", b, r.Status, r.Body)
+		}
+	}
+	r := e.call("PUT", "/api/splitreceive/rules", tok, rulesBody(e.accountID(tok, "apex"), "5912",
+		ownPct(e.accountID(tok, "savanna"), 30), ownPct(e.accountID(tok, "delta"), 40)))
+	if r.Status != 200 {
+		e.t.Fatalf("rules: %d %v", r.Status, r.Body)
+	}
+	return tok
+}

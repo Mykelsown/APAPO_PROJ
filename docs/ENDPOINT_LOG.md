@@ -179,3 +179,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Returns**: 200 `{dismissed: true}`. Repeating it is harmless. After this neither `GET /api/shield/check` nor preview's `shield_warning` shows that credit.
 - **Errors**: 404 `not_found` (unknown id or someone else's credit), 400 `invalid_json`, 401.
 - **Frontend must**: call it when the user taps "Send anyway" or closes the banner for good.
+
+## PUT and GET /api/splitreceive/rules
+
+- **Who may call**: a signed in, onboarded user. The PUT needs the PIN. Rules are private to their owner.
+- **PUT sends**: `{receiving_account_id, standing_consent: true, pin, destinations:[...]}`. Up to 5 destinations. Each destination is EITHER an own account `{account_id}` OR an outside beneficiary `{bank_code, account_number}`, plus optional `label`, plus exactly one of `percent` (above 0, at most 100, at most 2 decimals) or `amount_kobo` (fixed). The total of percentages cannot pass 100. Whatever is left stays in the receiving account. Empty `destinations` switches splitting off.
+- **PUT returns**: 200 `{"rules": {receiving_account_id, standing_consent: true, consent_at, destinations:[{id, kind, label, account_id?, bank_code, bank_name, masked_account_number, account_name?, percent? | amount_kobo?}], updated_at}}`. GET returns the same wrapper; `{"rules": null}` when nothing is set.
+- **When rules apply**: only to credits that arrive in the receiving account AFTER `consent_at` and that the bank has confirmed. Saving rules also makes that account the user's receiving account, so money sent to them by phone lands there and is split.
+- **Errors**: 400 `consent_required`, `invalid_receiving_account`, `too_many_destinations`, `invalid_destination` (`details.index`), `percent_total_exceeds_100`, `invalid_account_number`, `unknown_bank`; 401 `invalid_pin` or `pin_locked` (423); 403 `onboarding_required`; 401.
+- **Frontend must**: show a plain consent sentence with a checkbox ("Apapo may split money I receive in this account as set here"), ask for the PIN, then PUT. Show the "remainder stays in <account>" line using 100 minus the percentages.

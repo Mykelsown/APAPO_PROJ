@@ -45,6 +45,8 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/reports` | token | done | Report a suspicious outside account (evidence required) |
 | GET | `/api/shield/check?amount_kobo=` | token | done | Warn if the amount is near an unconfirmed credit |
 | POST | `/api/shield/dismiss` | token | done | Hide the Shield alert for one credit |
+| PUT | `/api/splitreceive/rules` | token + PIN | done | Save the user's Split-Receive rules (needs standing consent) |
+| GET | `/api/splitreceive/rules` | token | done | Read the rules (`{"rules": null}` if none) |
 
 ## Common error codes
 
