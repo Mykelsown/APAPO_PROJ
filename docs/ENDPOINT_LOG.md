@@ -29,3 +29,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Never returned**: the BVN itself. The server keeps only a hash and the last 4 digits.
 - **Errors**: 400 `invalid_bvn`, 400 `invalid_json`, 401 `unauthorized` / `invalid_token`.
 - **Frontend must**: ask for the BVN once after OTP when `onboarding.bvn_verified` is false, then go to PIN. Pre-fill the returned `display_name` where a name is shown.
+
+## POST /api/auth/pin
+
+- **Who may call**: a signed in user whose BVN is verified.
+- **Send**: `{"pin": "4821"}`, exactly 4 digits.
+- **Returns**: 200 `{pin_set: true, onboarding}`. After this `onboarding.complete` is true (BVN, PIN and a display name are all there).
+- **Errors**: 400 `invalid_pin_format`; 400 `weak_pin` (0000, 1234, 4321 and repeated digits); 403 `bvn_required`; 409 `pin_already_set`; 401 as usual.
+- **Storage**: PBKDF2 hash with a per user salt. The PIN is never returned or logged.
+- **Frontend must**: ask for the PIN twice on the client (confirm field) and send it once. Wrong PIN rules for payments are on the Split-Pay endpoints.

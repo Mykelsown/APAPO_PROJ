@@ -26,6 +26,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/auth/otp` | open | done | Ask for a sign in code (always 200 for a valid phone) |
 | POST | `/api/auth/verify-otp` | open | done | Check the code, get `access_token` |
 | POST | `/api/auth/bvn` | token | done | Mock BVN check (any 11 digits) |
+| POST | `/api/auth/pin` | token | done | Set the 4 digit PIN once, after BVN |
 
 ## Common error codes
 
