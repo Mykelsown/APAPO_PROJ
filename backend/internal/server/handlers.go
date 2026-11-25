@@ -51,6 +51,11 @@ func (s *Server) public(fn publicFn) http.HandlerFunc {
 
 // authed wraps a handler that needs a valid bearer token.
 func (s *Server) authed(fn authedFn) http.HandlerFunc {
+	return s.authedW(func(_ http.ResponseWriter, r *http.Request, uid string) (result, error) { return fn(r, uid) })
+}
+
+// authedW is authed for handlers that also need the response writer (to set headers).
+func (s *Server) authedW(fn func(http.ResponseWriter, *http.Request, string) (result, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tok := ""
 		if h := r.Header.Get("Authorization"); strings.HasPrefix(strings.ToLower(h), "bearer ") {
@@ -61,7 +66,7 @@ func (s *Server) authed(fn authedFn) http.HandlerFunc {
 			s.respond(w, result{}, aerr)
 			return
 		}
-		res, err := fn(r, uid)
+		res, err := fn(w, r, uid)
 		s.respond(w, res, err)
 	}
 }

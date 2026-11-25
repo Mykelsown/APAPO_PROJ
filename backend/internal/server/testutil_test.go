@@ -3,6 +3,8 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -127,3 +129,17 @@ var fullConsent = map[string]any{"accepted": true, "scopes": []string{"accounts"
 func linkBody(bank string) map[string]any {
 	return map[string]any{"bank_code": bank, "consent": fullConsent}
 }
+
+const naira = 100
+
+func outside(bank, number string) map[string]any {
+	return map[string]any{"bank_code": bank, "account_number": number}
+}
+
+func apapoTo(phone string) map[string]any { return map[string]any{"apapo_phone": phone} }
+
+func previewBody(amountNaira int64, rec map[string]any) map[string]any {
+	return map[string]any{"amount_kobo": amountNaira * naira, "recipient": rec}
+}
+
+func init() { log.SetOutput(io.Discard) }

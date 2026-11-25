@@ -95,3 +95,19 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Returns**: 200 `{user:{display_name:"Bola A.", recipient_type:"apapo"}}`. Only a masked name. Never an account number, bank or full name.
 - **Errors**: 400 `invalid_phone`; 400 `self_send` (your own number); 404 `not_found` for an unknown number, a user who has not finished sign up, or one with no receiving account (all look identical on purpose); 429 `rate_limited` over 30 lookups a minute.
 - **Frontend must**: use this on the "send to an Apapo user" screen, show `display_name` for the sender to confirm, then send only `recipient:{apapo_phone}` to Split-Pay. Do not store or display the looked-up phone beyond what the sender typed.
+
+## POST /api/splitpay/preview
+
+- **Who may call**: a signed in, onboarded user.
+- **Send**: `{amount_kobo, recipient, strategy?, min_balance_kobo?, max_legs?}`.
+  - `recipient` is EITHER an outside account `{bank_code, account_number (10 digits), account_name?}` OR an Apapo user `{apapo_phone}`, OR `{recent_id}` from `GET /api/recipients/recent`.
+  - Extra fields inside `recipient` (such as `recipient_type` and `masked_display_name`) are accepted and ignored. They never cause an error.
+  - `strategy` is `fewest` (default and only option). `min_balance_kobo` is kept in every account (default 0). `max_legs` default 4.
+  - `account_name` is what the user typed; if it differs from the real account name the preview flags `name_mismatch`.
+- **Returns**: 200 `{legs:[{account_id, bank_code, bank_name, masked_account_number, amount_kobo, fee_kobo, state, is_collector}], total_amount_kobo, total_fee_kobo, total_debit_kobo, collector_account_id, recipient, risk:{tier, reasons[]}, flags[], duplicate_warning, shield_warning}`.
+  - The planner uses the fewest accounts that cover the amount plus fees. The first leg is the collector, one of the user's own accounts. Fee is N10 (1000 kobo) per leg.
+  - `recipient` for an Apapo user is only `{recipient_type:"apapo", masked_display_name}`. For outside it is `{recipient_type:"outside", bank_code, bank_name, masked_account_number, account_name}` where `account_name` is the real name on the account (use it for the "Is this who you mean?" step).
+  - `risk.tier` is `low`, `unknown` or `high`. `flags` can include `reported_account`, `name_mismatch`, `first_payment`, `unusual_amount` (N100,000 or more) and `possible_duplicate`. `shield_warning` is `null` or `{credit_id, amount_kobo, sender_name, posted_at, message}`.
+- **Errors**: 400 `invalid_amount`, `invalid_recipient`, `invalid_account_number`, `unknown_bank`, `bank_not_supported`, `invalid_phone`, `self_send`, `invalid_strategy`, `invalid_json`; 403 `onboarding_required`; 404 `not_found` (unknown Apapo user); 422 `insufficient_funds` (`details.spendable_kobo`, `details.shortfall_kobo`); 422 `too_many_legs` (`details.legs_needed`, `details.max_legs`); 401.
+- **Seed recipients**: Apex `9000000001` is "Quick Returns Investments" (reported, tier `high`); `1000000001` at any bank is "Ada Okafor" (known good, tier `low`).
+- **Frontend must**: show legs and fees before the PIN. Show the recipient name from the response. If `risk.tier` is `high` show a strong warning; payment will then need `acknowledge_risk:true` on execute. Show `shield_warning.message` when present. A bank that is down is skipped by the planner, so the plan may use other accounts.

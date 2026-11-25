@@ -36,6 +36,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | DELETE | `/api/banks/{link_id}` | token | done | Revoke a bank link |
 | GET | `/api/dashboard?limit=` | token | done | Total balance, a card per bank, merged transaction feed |
 | GET | `/api/users/lookup?phone=` | token | done | Find another Apapo user by phone, masked name only |
+| POST | `/api/splitpay/preview` | token | done | Plan a payment (legs, fees, risk, warnings). Moves no money |
 
 ## Common error codes
 

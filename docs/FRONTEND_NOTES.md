@@ -26,3 +26,9 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 
 - Call `GET /api/me` and branch: `bvn_verified` false means the BVN screen; `pin_set` false means the PIN screen; `receiving_account` null means the user should link a bank first.
 - `display_name` is what other Apapo users see only as a masked name like "Bola A." (see people lookup).
+
+## Send money (preview)
+
+- Amounts are kobo. N150,000 is `15000000`.
+- Send the recipient exactly as you have it; extra display fields are fine and ignored.
+- Call preview whenever the amount or recipient changes, then once more right before the PIN screen. Execute plans again on the server, so never send legs yourself.
