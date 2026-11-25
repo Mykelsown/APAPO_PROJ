@@ -21,3 +21,8 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 - Flow for the two demo users: `POST /api/auth/login` with phone and PIN, no code needed.
 - The code is `123456` unless the backend sets `DEV_OTP`. Show a "demo code: 123456" hint in the UI.
 - Show the rate limit as a friendly message using `Retry-After` (seconds).
+
+## After sign in
+
+- Call `GET /api/me` and branch: `bvn_verified` false means the BVN screen; `pin_set` false means the PIN screen; `receiving_account` null means the user should link a bank first.
+- `display_name` is what other Apapo users see only as a masked name like "Bola A." (see people lookup).

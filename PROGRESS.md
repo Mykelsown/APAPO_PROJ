@@ -10,7 +10,7 @@ Branch: `APAPO_BACKEND`. Read this first at the start of any session and continu
 ## Left
 
 - [ ] GATE: user deploys to Nobus Cube and confirms the frontend reaches `/api/health`. Wait for "continue".
-- [ ] Section 3 A: sign in and profile (done: otp, verify-otp)
+- [x] Section 3 A: sign in and profile (done: otp, verify-otp, bvn, pin, login, me, profile)
 - [ ] Section 3 B: banks and dashboard
 - [ ] Section 3 C: people lookup
 - [ ] Section 3 D: Split-Pay

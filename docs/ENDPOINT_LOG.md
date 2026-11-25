@@ -47,3 +47,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Errors**: 401 `invalid_credentials` (wrong PIN, unknown phone, or a user who has not set a PIN yet; all look the same on purpose, wrong PIN adds `details.attempts_left`); 423 `pin_locked` after 5 wrong PINs for 15 minutes (`details.retry_after_seconds` and `Retry-After`); 429 `rate_limited` (per IP).
 - **Demo users**: Samuel `08012345678` PIN `4821`, Bola `08098765432` PIN `5912`.
 - **Frontend must**: use this for returning users instead of the OTP flow. On 423 show a countdown from `retry_after_seconds`.
+
+## GET /api/me and PUT /api/me/profile
+
+- **Who may call**: a signed in user.
+- **GET returns**: 200 `{user:{id, phone, display_name}, onboarding:{bvn_verified, pin_set, complete}, receiving_account}`. `receiving_account` is `null` until the user has linked a bank (then `{account_id, bank_code, bank_name, masked_account_number}`). Never the full account number.
+- **PUT sends**: `{"display_name": "Bola Adeyemi"}`, 1 to 80 characters; extra spaces are trimmed. Returns the same body as GET.
+- **Errors**: 400 `invalid_display_name`, 400 `invalid_json`, 401.
+- **Frontend must**: call GET once after sign in and use `onboarding` to decide which screen comes next (BVN, PIN, link banks, dashboard). Do not poll it.

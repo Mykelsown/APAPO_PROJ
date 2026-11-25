@@ -28,6 +28,8 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/auth/bvn` | token | done | Mock BVN check (any 11 digits) |
 | POST | `/api/auth/pin` | token | done | Set the 4 digit PIN once, after BVN |
 | POST | `/api/auth/login` | open | done | Phone and PIN sign in for finished users |
+| GET | `/api/me` | token | done | Profile, onboarding state, receiving account |
+| PUT | `/api/me/profile` | token | done | Change display name |
 
 ## Common error codes
 
