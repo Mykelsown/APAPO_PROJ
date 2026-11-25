@@ -28,9 +28,12 @@ type reply struct {
 
 func newEnv(t *testing.T) *env {
 	t.Helper()
-	cfg, err := config.Load(func(k string) (string, bool) {
-		return map[string]string{"APP_SECRET": "test-secret", "ALLOWED_ORIGIN": "*"}[k], k == "APP_SECRET" || k == "ALLOWED_ORIGIN"
-	}, "test")
+	return newEnvWith(t, map[string]string{"APP_SECRET": "test-secret", "ALLOWED_ORIGIN": "*"})
+}
+
+func newEnvWith(t *testing.T, vars map[string]string) *env {
+	t.Helper()
+	cfg, err := config.Load(func(k string) (string, bool) { v, ok := vars[k]; return v, ok }, "test")
 	if err != nil {
 		t.Fatal(err)
 	}

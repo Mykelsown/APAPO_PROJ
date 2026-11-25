@@ -225,3 +225,17 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Returns**: 201 `{credit_id, verified, runs:[run]}`. A confirmed credit raises the balance at once and, if the user has Split-Receive rules, is split immediately (`runs` has the run). An unconfirmed credit (`verified:false`) appears in the feed as `unverified`, does not change the balance, is not split, and triggers Shield warnings near its amount. Send `scan:false` to leave the splitting to `POST /api/splitreceive/scan` or the 10 second timer.
 - **Errors**: 400 `invalid_amount`, 404 `not_found` (account is not the user's), 403 `onboarding_required`, 409 `no_receiving_account`, 401.
 - **Use it for**: the salary story. Set rules (30 percent savings, 40 percent spending), then simulate a N200,000 credit: N60,000 to savings, N80,000 to spending, N60,000 stays.
+
+## POST /api/demo/failure (demo only)
+
+- **Who may call**: anyone (no token), so it can be used from curl or a hidden panel. Disabled (404) when `DEMO_ENDPOINTS=false`.
+- **Send**: `{account_id | bank_code, mode}`. Give one target, not both.
+- **Modes**:
+  - `insufficient_funds`: money cannot be taken out of that account or bank. A Split-Pay leg using it fails and the payment rolls back.
+  - `bank_unavailable`: the bank is down. The dashboard shows it as `unavailable` and leaves it out of the total, and the planner skips it.
+  - `timeout`: the next transfer touching the target moves the money but reports a timeout once; the server retries safely with the same reference and nothing is paid twice.
+  - `reversal_down`: needs `bank_code`. Refunds touching that bank fail while normal transfers still work. Use it with another failure to see the payment go to `needs_attention`, then clear it to watch it reach `rolled_back`.
+  - `none`: clears the fault for the given account or bank (for a `bank_code` it also clears a reversal outage). With no target it clears every fault.
+- **Returns**: 200 `{mode, account_id, bank_code}`.
+- **Errors**: 400 `invalid_mode`, `invalid_target`, `bank_code_required`, `unknown_bank`; 404 `not_found` (unknown account).
+- **Story for the demo**: (1) `insufficient_funds` on the Savanna account, pay N150,000: it rolls back and every balance is restored. (2) Also `reversal_down` on `delta`, pay again: `needs_attention` with a retry countdown. (3) `none` on `delta`: it becomes `rolled_back` within about 10 seconds.

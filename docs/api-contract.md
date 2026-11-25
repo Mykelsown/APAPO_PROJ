@@ -56,6 +56,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 
 The three `/api/demo/*` endpoints exist only because banks are simulated. They are not part of the product. They return 404 if the backend runs with `DEMO_ENDPOINTS=false`. Do not show them in the production UI; put them behind a hidden "Demo tools" panel.
 | POST | `/api/demo/simulate-credit` | token, DEMO | done | Make money arrive for the user (mock only) |
+| POST | `/api/demo/failure` | open, DEMO | done | Switch a simulated bank fault on or off (mock only) |
 
 ## Common error codes
 

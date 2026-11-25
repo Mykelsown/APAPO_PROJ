@@ -33,4 +33,5 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/splitreceive/runs/{id}/retry", s.authed(s.handleRetryRun))
 	mux.HandleFunc("GET /api/reconciliation", s.authed(s.handleRecon))
 	mux.HandleFunc("POST /api/demo/simulate-credit", s.demoOnly(s.authed(s.handleSimulateCredit)))
+	mux.HandleFunc("POST /api/demo/failure", s.demoOnly(s.public(s.handleFailure)))
 }
