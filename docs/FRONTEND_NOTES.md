@@ -38,3 +38,10 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 - Lookup, preview, execute with `recipient: {apapo_phone}`. Show only `masked_display_name`.
 - After it completes the recipient's dashboard shows a verified credit from "Samuel P." (the sender, masked).
 - Recent recipients come with an `id`; pass it as `recipient.recent_id` to pay them again without keeping phone numbers.
+
+## Safe Send and Shield
+
+- `risk.tier` colours: `low` green, `unknown` amber, `high` red. Show `risk.reasons` as plain text.
+- A `high` recipient needs a clear extra confirmation. Then send `acknowledge_risk: true` with execute; without it execute answers 409 `risk_acknowledgement_required` and moves no money.
+- Shield never blocks. Show its message and let the user decide.
+- Demo path: preview N80,000 for Samuel for the Shield banner; Apex `9000000001` for the red warning.

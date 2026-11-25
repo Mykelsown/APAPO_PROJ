@@ -171,3 +171,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Seed**: Samuel has an unconfirmed N80,000 credit from "Greenfield Traders", so any amount between N72,000 and N88,000 triggers the alert for him.
 - **Errors**: 400 `invalid_amount`, 401.
 - **Frontend must**: call it when the user changes the amount on the send screen (or just use `shield_warning` from preview, same data). Show a banner with the message and two buttons: "Wait" and "Send anyway". Shield warns; it never blocks.
+
+## POST /api/shield/dismiss
+
+- **Who may call**: the owner of the credit.
+- **Send**: `{"credit_id": "crd_..."}` (from the alert).
+- **Returns**: 200 `{dismissed: true}`. Repeating it is harmless. After this neither `GET /api/shield/check` nor preview's `shield_warning` shows that credit.
+- **Errors**: 404 `not_found` (unknown id or someone else's credit), 400 `invalid_json`, 401.
+- **Frontend must**: call it when the user taps "Send anyway" or closes the banner for good.
