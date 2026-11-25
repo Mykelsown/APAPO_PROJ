@@ -5,26 +5,33 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Mykelsown/apapo-backend/internal/app"
 	"github.com/Mykelsown/apapo-backend/internal/config"
 	"github.com/Mykelsown/apapo-backend/internal/httpx"
 )
 
 // Server holds shared dependencies for handlers.
 type Server struct {
-	cfg config.Config
-	now func() time.Time
+	cfg   config.Config
+	now   func() time.Time
+	world *app.World
 }
 
 // New builds a Server.
 func New(cfg config.Config) *Server {
-	return &Server{cfg: cfg, now: func() time.Time { return time.Now().UTC() }}
+	w := app.New(app.Config{Secret: cfg.AppSecret, DevOTP: cfg.DevOTP, DemoEnabled: cfg.DemoEnabled})
+	return &Server{cfg: cfg, now: func() time.Time { return time.Now().UTC() }, world: w}
 }
+
+// World exposes the domain, for the background workers and tests.
+func (s *Server) World() *app.World { return s.world }
 
 // Handler returns the full HTTP handler with middleware applied.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.handleHealth)
 	mux.HandleFunc("GET /healthz", s.handleHealthz)
+	s.routes(mux)
 
 	cors := httpx.NewCORS(s.cfg.AllowedOrigins, s.cfg.AllowAnyOrigin)
 	return httpx.Recover(httpx.Logger(cors.Wrap(jsonErrors(mux))))

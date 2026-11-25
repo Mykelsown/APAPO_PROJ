@@ -18,6 +18,7 @@ type Config struct {
 	AllowedOrigins  []string
 	AllowAnyOrigin  bool
 	DevOTP          string
+	DemoEnabled     bool
 	Provider        string
 	TrustProxy      bool
 	Version         string
@@ -72,6 +73,15 @@ func Load(getenv func(string) (string, bool), buildVersion string) (Config, erro
 	}
 	if len(c.DevOTP) != 6 || strings.Trim(c.DevOTP, "0123456789") != "" {
 		return c, errors.New("DEV_OTP must be exactly 6 digits")
+	}
+
+	c.DemoEnabled = true
+	if d := get("DEMO_ENDPOINTS"); d != "" {
+		b, err := strconv.ParseBool(d)
+		if err != nil {
+			return c, errors.New("DEMO_ENDPOINTS must be true or false")
+		}
+		c.DemoEnabled = b
 	}
 
 	c.Provider = strings.ToLower(get("PROVIDER"))

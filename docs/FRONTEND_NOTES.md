@@ -14,3 +14,10 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 - A fetch error or timeout (try 5 seconds) means "Not connected". There is no JSON in that case.
 - No token needed. Do not call `/healthz` from the app; it is for the container.
 - If the browser shows a CORS error, the backend's `ALLOWED_ORIGIN` does not include your exact origin (scheme, host and port, no trailing path).
+
+## Sign in
+
+- Flow for a new person: `POST /api/auth/otp`, `POST /api/auth/verify-otp`, then (next endpoints) `POST /api/auth/bvn`, `POST /api/auth/pin`.
+- Flow for the two demo users: `POST /api/auth/login` with phone and PIN, no code needed.
+- The code is `123456` unless the backend sets `DEV_OTP`. Show a "demo code: 123456" hint in the UI.
+- Show the rate limit as a friendly message using `Retry-After` (seconds).
