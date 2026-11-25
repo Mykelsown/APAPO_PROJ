@@ -48,6 +48,8 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | PUT | `/api/splitreceive/rules` | token + PIN | done | Save the user's Split-Receive rules (needs standing consent) |
 | GET | `/api/splitreceive/rules` | token | done | Read the rules (`{"rules": null}` if none) |
 | POST | `/api/splitreceive/scan` | token | done | Split new confirmed credits now (also runs every 10 seconds) |
+| GET | `/api/splitreceive/runs` | token | done | The user's splits, newest first, with legs |
+| POST | `/api/splitreceive/runs/{id}/retry` | token | done | Retry the failed shares of one run |
 
 ## Common error codes
 

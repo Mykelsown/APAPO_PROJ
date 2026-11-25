@@ -197,3 +197,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Never split**: unconfirmed credits, credits from before consent, credits in a different account, and Apapo's own movements (references starting `pay_`, `rev_`, `sr_`). A credit from another Apapo user (a P2P payment) IS split, once, by the receiver's rules; that happens automatically the moment the payment completes.
 - **Errors**: 401.
 - **Frontend must**: show a "Check for new money" button that calls this, then refresh runs and the dashboard. Do not call it in a tight loop.
+
+## GET /api/splitreceive/runs and POST /api/splitreceive/runs/{id}/retry
+
+- **Who may call**: the owner. Another user's run gives 404.
+- **GET returns**: 200 `{runs:[run]}`, newest first. Run shape as in the scan endpoint. `sent_kobo + held_kobo + kept_kobo = credit_amount_kobo` always: `sent` left the account, `held` is a share that failed and is still in the receiving account, `kept` is the remainder the rules did not allocate.
+- **Shares are independent**: there is no rollback. If one share fails the others still go. A failed leg has `state:"failed"` and an `error` (`insufficient_funds`, `bank_unavailable`, `timeout`, `bank_error`, `destination_unavailable`).
+- **POST retry**: no body. Retries only the failed shares, with the same references, so a share can never be paid twice. Returns 200 `{run}`. If nothing is failed: 409 `nothing_to_retry`. Unknown or foreign id: 404.
+- **Frontend must**: show a "Retry" button on runs with `state:"partial"`. Say "held" in plain words ("still in your Apex account").
