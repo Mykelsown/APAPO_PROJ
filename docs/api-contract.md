@@ -35,6 +35,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | GET | `/api/accounts` | token | done | The user's linked accounts, masked, with balances |
 | DELETE | `/api/banks/{link_id}` | token | done | Revoke a bank link |
 | GET | `/api/dashboard?limit=` | token | done | Total balance, a card per bank, merged transaction feed |
+| GET | `/api/users/lookup?phone=` | token | done | Find another Apapo user by phone, masked name only |
 
 ## Common error codes
 

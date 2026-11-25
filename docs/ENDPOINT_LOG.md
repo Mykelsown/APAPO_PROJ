@@ -87,3 +87,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Rules**: `direction` is `credit` or `debit`. `verification` is `verified` or `unverified`; a credit the bank has not confirmed is `unverified` (show a badge, it is not in the balance yet). A bank that is down has `unavailable:true` and is left out of `total_balance_kobo`. Feed is newest first and merged across all banks.
 - **Seed**: Samuel sees N195,000 across four banks and an unverified N80,000 credit from "Greenfield Traders".
 - **Frontend must**: show a "Bank unavailable" state on the card, and never add unavailable banks into a total yourself. Re-fetch after a payment finishes.
+
+## GET /api/users/lookup?phone=
+
+- **Who may call**: a signed in user.
+- **Query**: `phone` in any Nigerian format (`0809...`, `+234809...`; encode `+` as `%2B`).
+- **Returns**: 200 `{user:{display_name:"Bola A.", recipient_type:"apapo"}}`. Only a masked name. Never an account number, bank or full name.
+- **Errors**: 400 `invalid_phone`; 400 `self_send` (your own number); 404 `not_found` for an unknown number, a user who has not finished sign up, or one with no receiving account (all look identical on purpose); 429 `rate_limited` over 30 lookups a minute.
+- **Frontend must**: use this on the "send to an Apapo user" screen, show `display_name` for the sender to confirm, then send only `recipient:{apapo_phone}` to Split-Pay. Do not store or display the looked-up phone beyond what the sender typed.
