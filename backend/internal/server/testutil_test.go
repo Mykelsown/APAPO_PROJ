@@ -108,3 +108,22 @@ func mustJSON(v any) []byte {
 }
 
 const time_minute = time.Minute
+
+// onboarded creates a fully onboarded new user and returns the token.
+func (e *env) onboarded(phone, pin string) string {
+	e.t.Helper()
+	tok := e.signUp(phone)
+	if r := e.call("POST", "/api/auth/bvn", tok, map[string]string{"bvn": "22200011122"}); r.Status != 200 {
+		e.t.Fatal(r.Body)
+	}
+	if r := e.call("POST", "/api/auth/pin", tok, map[string]string{"pin": pin}); r.Status != 200 {
+		e.t.Fatal(r.Body)
+	}
+	return tok
+}
+
+var fullConsent = map[string]any{"accepted": true, "scopes": []string{"accounts", "balances", "transactions"}}
+
+func linkBody(bank string) map[string]any {
+	return map[string]any{"bank_code": bank, "consent": fullConsent}
+}

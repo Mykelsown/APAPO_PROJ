@@ -61,3 +61,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Who may call**: a signed in user.
 - **Returns**: 200 `{banks:[{code, name, supported}]}`. Four supported banks: `apex` Apex Bank, `delta` Delta Trust Bank, `savanna` Savanna Bank, `harbor` Harbor MFB. Two with `supported:false` (`cedar`, `meridian`), shown as "coming soon".
 - **Frontend must**: render a card per bank; disable linking for `supported:false`. Use these `code` values everywhere (not "access" or "gtb").
+
+## POST /api/banks/link
+
+- **Who may call**: a signed in user who finished onboarding (BVN, PIN, name).
+- **Send**: `{"bank_code": "apex", "consent": {"accepted": true, "scopes": ["accounts","balances","transactions"]}}`. All three scopes and `accepted:true` are required.
+- **Returns**: 201 for a new link, 200 if the bank was already linked (idempotent, same link and account). Body: `{link_id, bank_code, bank_name, linked_at, expires_at, scopes, account:{id, link_id, bank_code, bank_name, masked_account_number, balance_kobo, unavailable, is_receiving}}`. The link expires 90 days after `linked_at`.
+- **Simulated money**: a newly linked account gets the demo opening balance for that bank (Apex N70,000, Delta N60,000, Savanna N45,000, Harbor N20,000). The first linked bank becomes the receiving account.
+- **Errors**: 400 `consent_required`, 400 `unknown_bank`, 400 `bank_not_supported` (coming soon banks), 403 `onboarding_required`, 401, 400 `invalid_json`.
+- **Frontend must**: show a consent screen listing the three scopes with an explicit accept button before calling. Treat 200 and 201 the same. Account numbers are always masked.
