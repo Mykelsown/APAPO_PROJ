@@ -6,4 +6,5 @@ import "net/http"
 func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/auth/otp", s.authLimited(s.handleOTP))
 	mux.HandleFunc("POST /api/auth/verify-otp", s.authLimited(s.handleVerifyOTP))
+	mux.HandleFunc("POST /api/auth/bvn", s.authed(s.handleBVN))
 }

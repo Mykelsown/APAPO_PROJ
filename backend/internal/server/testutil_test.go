@@ -101,3 +101,8 @@ func get(m map[string]any, path ...string) any {
 	}
 	return cur
 }
+
+func mustJSON(v any) []byte {
+	b, _ := json.Marshal(v)
+	return b
+}

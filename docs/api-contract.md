@@ -25,6 +25,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | GET | `/healthz` | open | done | Plain text `ok` for container health checks |
 | POST | `/api/auth/otp` | open | done | Ask for a sign in code (always 200 for a valid phone) |
 | POST | `/api/auth/verify-otp` | open | done | Check the code, get `access_token` |
+| POST | `/api/auth/bvn` | token | done | Mock BVN check (any 11 digits) |
 
 ## Common error codes
 

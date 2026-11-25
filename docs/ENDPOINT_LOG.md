@@ -20,3 +20,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **verify-otp returns**: 200 `{access_token, expires_at, user:{id, phone, display_name}, onboarding:{bvn_verified, pin_set, complete}}`. A new number creates a new user with `onboarding.complete:false`.
 - **Errors**: 400 `invalid_phone`; 400 `invalid_json`; 401 `invalid_code` (`details.attempts_left`); 423 `otp_locked` after 5 wrong codes (`details.retry_after_seconds`, `Retry-After` header, 10 minutes); 429 `rate_limited` on the 4th code request for one phone inside 10 minutes, or more than 30 calls a minute from one IP on any `/api/auth/*` route (`Retry-After` header).
 - **Frontend must**: send the phone as typed (the server normalises it). Store `access_token` and send it as `Authorization: Bearer <token>` on every other call. Token lasts 24 hours; on any 401 `invalid_token` go back to sign in. If `onboarding.complete` is false, continue to BVN then PIN.
+
+## POST /api/auth/bvn
+
+- **Who may call**: a signed in user (even one still onboarding).
+- **Send**: `{"bvn": "22212345678"}`, exactly 11 digits. Mock check: any 11 digits pass.
+- **Returns**: 200 `{bvn_verified: true, display_name, onboarding}`. If the user had no name yet, the mock identity service fills `display_name` with a name.
+- **Never returned**: the BVN itself. The server keeps only a hash and the last 4 digits.
+- **Errors**: 400 `invalid_bvn`, 400 `invalid_json`, 401 `unauthorized` / `invalid_token`.
+- **Frontend must**: ask for the BVN once after OTP when `onboarding.bvn_verified` is false, then go to PIN. Pre-fill the returned `display_name` where a name is shown.
