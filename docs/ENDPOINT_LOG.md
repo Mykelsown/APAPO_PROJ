@@ -217,3 +217,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **status**: `split`, `partial` (some share held), `not_split` (no rules, before consent, or other account), `waiting_for_bank` (credit not confirmed yet).
 - **Errors**: 401.
 - **Frontend must**: render it as a statement: a row per credit with a stacked bar of sent, held and kept, and a totals row. Show a "Balanced" tick from `balanced`.
+
+## POST /api/demo/simulate-credit (demo only)
+
+- **Who may call**: a signed in, onboarded user. Disabled (404) when the backend has `DEMO_ENDPOINTS=false`.
+- **Send**: `{amount_kobo, sender_name?, verified? (default true), account_id? (default: the receiving account), scan? (default true)}`.
+- **Returns**: 201 `{credit_id, verified, runs:[run]}`. A confirmed credit raises the balance at once and, if the user has Split-Receive rules, is split immediately (`runs` has the run). An unconfirmed credit (`verified:false`) appears in the feed as `unverified`, does not change the balance, is not split, and triggers Shield warnings near its amount. Send `scan:false` to leave the splitting to `POST /api/splitreceive/scan` or the 10 second timer.
+- **Errors**: 400 `invalid_amount`, 404 `not_found` (account is not the user's), 403 `onboarding_required`, 409 `no_receiving_account`, 401.
+- **Use it for**: the salary story. Set rules (30 percent savings, 40 percent spending), then simulate a N200,000 credit: N60,000 to savings, N80,000 to spending, N60,000 stays.

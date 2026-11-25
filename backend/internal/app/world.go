@@ -69,13 +69,14 @@ func (w *World) seedLocked() {
 		naira  int64
 	}
 	mk := func(name, phone, pin, bvn string, accts []acct) *User {
-		u := &User{ID: w.nextID("usr"), Phone: phone, DisplayName: name}
+		u := &User{ID: "usr_seed_" + phone[len(phone)-4:], Phone: phone, DisplayName: name}
 		u.BVNHash, u.BVNLast4 = sha("bvn", bvn), bvn[len(bvn)-4:]
 		u.PINHash, u.PINSalt = newPINHash(pin)
 		w.users[u.ID] = u
 		w.byPhone[phone] = u.ID
 		for _, a := range accts {
-			acc := w.linkBank(u, a.bank, []string{"accounts", "balances", "transactions"}, now)
+			acc := w.linkBank(u, a.bank, []string{"accounts", "balances", "transactions"}, now,
+				"lnk_seed_"+u.ID[9:]+"_"+a.bank, "acc_seed_"+u.ID[9:]+"_"+a.bank)
 			acc.Balance = a.naira * 100
 			acc.Number = a.number
 		}
@@ -115,7 +116,7 @@ func (w *World) seedLocked() {
 	}
 	w.addTx(w.userAccount(u2, "apex"), "credit", 3000000, "Opening deposit", "income", true, now.Add(-96*time.Hour))
 	// The N80,000 credit the bank has not confirmed yet, for Shield.
-	c := &Credit{ID: w.nextID("crd"), UserID: u1.ID, AccountID: apex1.ID, Amount: 8000000,
+	c := &Credit{ID: "crd_seed_unconfirmed", UserID: u1.ID, AccountID: apex1.ID, Amount: 8000000,
 		Sender: "Greenfield Traders", Reference: "bank_" + randHex(4), Verified: false, At: now.Add(-2 * time.Hour)}
 	w.credits = append(w.credits, c)
 	w.addTx(apex1, "credit", c.Amount, c.Sender, "income", false, c.At)

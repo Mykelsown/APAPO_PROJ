@@ -52,6 +52,11 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/splitreceive/runs/{id}/retry` | token | done | Retry the failed shares of one run |
 | GET | `/api/reconciliation` | token | done | Every credit and where each naira went (sent + held + kept = credit) |
 
+## Demo helpers (mock only)
+
+The three `/api/demo/*` endpoints exist only because banks are simulated. They are not part of the product. They return 404 if the backend runs with `DEMO_ENDPOINTS=false`. Do not show them in the production UI; put them behind a hidden "Demo tools" panel.
+| POST | `/api/demo/simulate-credit` | token, DEMO | done | Make money arrive for the user (mock only) |
+
 ## Common error codes
 
 | HTTP | code | When |

@@ -11,7 +11,7 @@ const linkTTL = 90 * 24 * time.Hour
 
 // linkBank creates (or returns) the active link and account for a bank. Caller holds the lock.
 // Linking twice is idempotent: the existing account comes back.
-func (w *World) linkBank(u *User, bank string, scopes []string, now time.Time) *Account {
+func (w *World) linkBank(u *User, bank string, scopes []string, now time.Time, ids ...string) *Account {
 	for _, l := range w.links {
 		if l.UserID == u.ID && l.BankCode == bank && !l.Revoked && now.Before(l.ExpiresAt) {
 			for _, id := range w.accOrder {
@@ -21,7 +21,11 @@ func (w *World) linkBank(u *User, bank string, scopes []string, now time.Time) *
 			}
 		}
 	}
-	l := &Link{ID: w.nextID("lnk"), UserID: u.ID, BankCode: bank, Scopes: scopes, LinkedAt: now, ExpiresAt: now.Add(linkTTL)}
+	linkID, accID := w.nextID("lnk"), w.nextID("acc")
+	if len(ids) == 2 { // seed data uses fixed ids so tokens and cached ids survive a demo reset
+		linkID, accID = ids[0], ids[1]
+	}
+	l := &Link{ID: linkID, UserID: u.ID, BankCode: bank, Scopes: scopes, LinkedAt: now, ExpiresAt: now.Add(linkTTL)}
 	w.links[l.ID] = l
 	// A revoked link's account comes back with its balance, so money never vanishes.
 	for _, id := range w.accOrder {
@@ -30,7 +34,7 @@ func (w *World) linkBank(u *User, bank string, scopes []string, now time.Time) *
 			return a
 		}
 	}
-	a := &Account{ID: w.nextID("acc"), UserID: u.ID, LinkID: l.ID, BankCode: bank, Active: true,
+	a := &Account{ID: accID, UserID: u.ID, LinkID: l.ID, BankCode: bank, Active: true,
 		Number: deriveNumber(u.ID, bank), Balance: defaultBalanceNaira[bank] * 100}
 	w.accounts[a.ID] = a
 	w.accOrder = append(w.accOrder, a.ID)
