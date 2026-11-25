@@ -34,6 +34,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/banks/link` | token | done | Link a bank after consent (idempotent) |
 | GET | `/api/accounts` | token | done | The user's linked accounts, masked, with balances |
 | DELETE | `/api/banks/{link_id}` | token | done | Revoke a bank link |
+| GET | `/api/dashboard?limit=` | token | done | Total balance, a card per bank, merged transaction feed |
 
 ## Common error codes
 

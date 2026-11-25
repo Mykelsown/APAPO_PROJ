@@ -78,3 +78,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **DELETE returns**: 200 `{link_id, revoked: true}`. The account disappears from `GET /api/accounts`, from the dashboard and from every payment plan. If it was the receiving account, another linked account takes over (or none).
 - **Errors**: 404 `not_found` (unknown or not yours), 401.
 - **Frontend must**: ask "Are you sure?" before revoking. Linking the same bank again restores the account with its balance.
+
+## GET /api/dashboard
+
+- **Who may call**: a signed in user.
+- **Query**: `limit` optional, default 20, max 100 (feed length).
+- **Returns**: 200 `{total_balance_kobo, banks:[{link_id, bank_code, bank_name, balance_kobo, unavailable, expires_at, accounts:[...]}], transactions:[{id, direction, amount_kobo, bank_name, bank_code, counterparty, category, verification, posted_at}]}`.
+- **Rules**: `direction` is `credit` or `debit`. `verification` is `verified` or `unverified`; a credit the bank has not confirmed is `unverified` (show a badge, it is not in the balance yet). A bank that is down has `unavailable:true` and is left out of `total_balance_kobo`. Feed is newest first and merged across all banks.
+- **Seed**: Samuel sees N195,000 across four banks and an unverified N80,000 credit from "Greenfield Traders".
+- **Frontend must**: show a "Bank unavailable" state on the card, and never add unavailable banks into a total yourself. Re-fetch after a payment finishes.

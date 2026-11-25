@@ -15,4 +15,5 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/banks/link", s.authed(s.handleLink))
 	mux.HandleFunc("GET /api/accounts", s.authed(s.handleAccounts))
 	mux.HandleFunc("DELETE /api/banks/{link_id}", s.authed(s.handleRevoke))
+	mux.HandleFunc("GET /api/dashboard", s.authed(s.handleDashboard))
 }
