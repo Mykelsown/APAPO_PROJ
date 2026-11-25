@@ -70,3 +70,11 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Simulated money**: a newly linked account gets the demo opening balance for that bank (Apex N70,000, Delta N60,000, Savanna N45,000, Harbor N20,000). The first linked bank becomes the receiving account.
 - **Errors**: 400 `consent_required`, 400 `unknown_bank`, 400 `bank_not_supported` (coming soon banks), 403 `onboarding_required`, 401, 400 `invalid_json`.
 - **Frontend must**: show a consent screen listing the three scopes with an explicit accept button before calling. Treat 200 and 201 the same. Account numbers are always masked.
+
+## GET /api/accounts and DELETE /api/banks/{link_id}
+
+- **Who may call**: a signed in user. Owner only: another user's link gives 404.
+- **GET returns**: 200 `{accounts:[{id, link_id, bank_code, bank_name, masked_account_number, balance_kobo, unavailable, is_receiving}]}`. Use `id` as `account_id` in other calls. `is_receiving` marks the account that receives money (used by Split-Receive and by P2P).
+- **DELETE returns**: 200 `{link_id, revoked: true}`. The account disappears from `GET /api/accounts`, from the dashboard and from every payment plan. If it was the receiving account, another linked account takes over (or none).
+- **Errors**: 404 `not_found` (unknown or not yours), 401.
+- **Frontend must**: ask "Are you sure?" before revoking. Linking the same bank again restores the account with its balance.

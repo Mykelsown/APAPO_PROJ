@@ -13,4 +13,6 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/me/profile", s.authed(s.handleProfile))
 	mux.HandleFunc("GET /api/banks", s.authed(s.handleBanks))
 	mux.HandleFunc("POST /api/banks/link", s.authed(s.handleLink))
+	mux.HandleFunc("GET /api/accounts", s.authed(s.handleAccounts))
+	mux.HandleFunc("DELETE /api/banks/{link_id}", s.authed(s.handleRevoke))
 }
