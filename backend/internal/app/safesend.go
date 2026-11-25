@@ -108,3 +108,19 @@ func (w *World) ShieldDismiss(uid, creditID string) *Error {
 	}
 	return errNotFound()
 }
+
+// DebugReports dumps the report store as text. Tests use it to prove no account numbers or
+// user ids are kept in the clear.
+func (w *World) DebugReports() string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	var b strings.Builder
+	for ah, m := range w.reports {
+		b.WriteString(ah)
+		for rh := range m {
+			b.WriteString(" " + rh)
+		}
+		b.WriteString("\n")
+	}
+	return b.String()
+}

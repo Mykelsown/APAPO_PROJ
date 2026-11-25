@@ -42,6 +42,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | GET | `/api/payments?limit=&before=` | token | done | The user's payment history, newest first, id cursor |
 | GET | `/api/recipients/recent` | token | done | People the user paid before, masked |
 | POST | `/api/risk/check` | token | done | Safe Send verdict for a recipient (same body as preview) |
+| POST | `/api/reports` | token | done | Report a suspicious outside account (evidence required) |
 
 ## Common error codes
 

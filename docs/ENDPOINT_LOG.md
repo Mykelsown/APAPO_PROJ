@@ -152,3 +152,12 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Rules**: `high` when at least 3 different people reported the account. A clean Apapo user, or a payee with a clean record, can be `low` even on a first payment. Anything else with a flag is `unknown`.
 - **Errors**: 400 `invalid_amount`, `invalid_account_number`, `unknown_bank`, `invalid_recipient`, `invalid_phone`, `self_send`; 403 `onboarding_required`; 404 `not_found`; 401.
 - **Frontend must**: colour the tier (green low, amber unknown, red high) and show `reasons` under the recipient name. For `high`, make the user confirm clearly; execute will then require `acknowledge_risk: true`.
+
+## POST /api/reports
+
+- **Who may call**: a signed in, onboarded user.
+- **Send**: `{"recipient": {"bank_code": "harbor", "account_number": "6600000001"}, "evidence_ref": "screenshot-123"}`. `evidence_ref` is any reference to the evidence (1 to 500 characters), required.
+- **Returns**: 201 `{status:"reported", message}` for a new report; 200 `{status:"already_reported"}` if this user already reported this account (one report per person per account).
+- **Errors**: 400 `evidence_required`; 400 `invalid_account_number` / `unknown_bank` / `bank_not_supported`; 429 `rate_limited` after 5 new reports in 24 hours (`Retry-After` header); 403 `onboarding_required`; 401.
+- **Privacy**: reports are stored only as salted hashes of the account and of the reporter. When 3 different people have reported an account its risk tier becomes `high`.
+- **Frontend must**: offer "Report this account" on the Safe Send warning and after a payment. Treat 200 and 201 as success.
