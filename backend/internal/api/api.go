@@ -49,6 +49,9 @@ type Deps struct {
 	AuthBurst, AuthPerMinute int
 	// TrustProxy reads the client IP from X-Forwarded-For. Set it only behind a proxy you run.
 	TrustProxy bool
+	// Version and ProviderName are reported by GET /api/health.
+	Version      string
+	ProviderName string
 }
 
 type Server struct {
@@ -68,6 +71,24 @@ func New(d Deps) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	})
+	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
+		version := d.Version
+		if version == "" {
+			version = "dev"
+		}
+		provider := d.ProviderName
+		if provider == "" {
+			provider = "mock"
+		}
+		writeJSON(w, http.StatusOK, map[string]string{
+			"status":   "ok",
+			"service":  "apapo-api",
+			"version":  version,
+			"provider": provider,
+			"time":     time.Now().UTC().Format(time.RFC3339),
+			"message":  "Backend is reachable",
+		})
 	})
 	mux.HandleFunc("POST /api/auth/otp", s.requestOTP)
 	mux.HandleFunc("POST /api/auth/verify-otp", s.verifyOTP)

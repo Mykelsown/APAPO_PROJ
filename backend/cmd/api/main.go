@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/Mykelsown/apapo/backend/internal/api"
@@ -62,8 +65,16 @@ func newExecutor(p bank.Provider, s payments.Store, a audit.Logger) *payments.Ex
 	return ex
 }
 
+// buildVersion is set with -ldflags "-X main.buildVersion=...".
+var buildVersion = "dev"
+
 func main() {
+	healthcheck := flag.Bool("healthcheck", false, "call /healthz on the local server and exit 0 if healthy (used by Docker HEALTHCHECK)")
+	flag.Parse()
 	cfg := config.Load()
+	if *healthcheck {
+		os.Exit(runHealthcheck(cfg.Addr))
+	}
 	if cfg.Provider == "real" && (cfg.AppSecret == "dev-only-secret-change-me" || cfg.DevOTP != "") {
 		log.Fatal("refusing to start with PROVIDER=real and the default APP_SECRET or DEV_OTP set")
 	}
@@ -198,7 +209,7 @@ func main() {
 		log.Printf("reversal startup rescan failed: %v", err)
 	}
 	srv := &http.Server{Addr: cfg.Addr, Handler: api.New(api.Deps{Provider: prov.bank, Executor: paymentExecutor, Limits: limSvc, Store: store, Mock: prov.mock, Auth: authSvc, Linker: prov.linker, Links: linkSvc, SplitReceive: srSvc, SafeSend: ssSvc, Categories: &categorize.Service{Store: catStore, Now: time.Now}, Audit: auditLog,
-		AllowedOrigin: cfg.AllowedOrigin, TrustProxy: cfg.TrustProxy}),
+		AllowedOrigin: cfg.AllowedOrigin, TrustProxy: cfg.TrustProxy, Version: buildVersion, ProviderName: cfg.Provider}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		// Longer than the per-request deadline, so a slow handler still gets to write its error.
@@ -250,6 +261,30 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	srv.Shutdown(ctx)
+}
+
+// runHealthcheck calls /healthz on the local listener. It returns a process exit code.
+func runHealthcheck(addr string) int {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "bad address:", err)
+		return 1
+	}
+	if host == "" || host == "0.0.0.0" || host == "::" || strings.HasPrefix(host, "[") {
+		host = "127.0.0.1"
+	}
+	client := &http.Client{Timeout: 3 * time.Second}
+	resp, err := client.Get("http://" + net.JoinHostPort(host, port) + "/healthz")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "unhealthy:", err)
+		return 1
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		fmt.Fprintln(os.Stderr, "unhealthy: status", resp.StatusCode)
+		return 1
+	}
+	return 0
 }
 
 // startupSummary says how the server is set up, without any secret values.

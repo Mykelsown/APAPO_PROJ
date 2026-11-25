@@ -33,7 +33,7 @@ type Config struct {
 
 func Load() Config {
 	return Config{
-		Addr:          get("ADDR", ":8080"),
+		Addr:          addrFromEnv(),
 		DatabaseURL:   os.Getenv("DATABASE_URL"),
 		Provider:      get("PROVIDER", "mock"),
 		AppSecret:     get("APP_SECRET", "dev-only-secret-change-me"),
@@ -56,6 +56,16 @@ func scanInterval() time.Duration {
 		}
 	}
 	return 10 * time.Second
+}
+
+func addrFromEnv() string {
+	if v := os.Getenv("ADDR"); v != "" {
+		return v
+	}
+	if port := os.Getenv("PORT"); port != "" {
+		return ":" + strings.TrimPrefix(port, ":")
+	}
+	return ":8080"
 }
 
 func get(k, def string) string {
