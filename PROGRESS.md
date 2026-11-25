@@ -13,7 +13,7 @@ Branch: `APAPO_BACKEND`. Read this first at the start of any session and continu
 - [x] Section 3 A: sign in and profile (done: otp, verify-otp, bvn, pin, login, me, profile)
 - [x] Section 3 B: banks and dashboard
 - [x] Section 3 C: people lookup
-- [ ] Section 3 D: Split-Pay
+- [x] Section 3 D: Split-Pay
 - [ ] Section 3 E: Safe Send and Shield
 - [ ] Section 3 F: Split-Receive and reconciliation
 - [ ] Section 3 G: demo helpers

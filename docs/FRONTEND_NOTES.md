@@ -32,3 +32,9 @@ Short, plain notes per endpoint. The full table is in `docs/api-contract.md`.
 - Amounts are kobo. N150,000 is `15000000`.
 - Send the recipient exactly as you have it; extra display fields are fine and ignored.
 - Call preview whenever the amount or recipient changes, then once more right before the PIN screen. Execute plans again on the server, so never send legs yourself.
+
+## Sending to another Apapo user (P2P)
+
+- Lookup, preview, execute with `recipient: {apapo_phone}`. Show only `masked_display_name`.
+- After it completes the recipient's dashboard shows a verified credit from "Samuel P." (the sender, masked).
+- Recent recipients come with an `id`; pass it as `recipient.recent_id` to pay them again without keeping phone numbers.

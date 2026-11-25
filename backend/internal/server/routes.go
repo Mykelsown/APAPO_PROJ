@@ -20,4 +20,6 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/splitpay/preview", s.authed(s.handlePreview))
 	mux.HandleFunc("POST /api/splitpay/execute", s.executeHandler())
 	mux.HandleFunc("GET /api/splitpay/{id}", s.authed(s.handlePaymentStatus))
+	mux.HandleFunc("GET /api/payments", s.authed(s.handlePayments))
+	mux.HandleFunc("GET /api/recipients/recent", s.authed(s.handleRecent))
 }

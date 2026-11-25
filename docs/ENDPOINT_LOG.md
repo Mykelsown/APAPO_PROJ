@@ -133,3 +133,13 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **Polling**: while `state` is `planned`, `collecting` or `sending`, poll every 1 to 2 seconds. `completed` and `rolled_back` are final. `needs_attention` means a refund is being retried: show "Your money is safe, we are putting it back" and keep polling every 10 seconds. `next_reversal_retry_at` is only set in that state. When `human_review` is true show "Our team is looking at this".
 - **Errors**: 404 `not_found`, 401.
 
+
+## GET /api/payments and GET /api/recipients/recent
+
+- **Who may call**: a signed in user. Owner only: you only ever see your own payments and recipients.
+- **GET /api/payments query**: `limit` (default 20, max 100), `before` (a payment id from `next_before`).
+- **Returns**: 200 `{payments:[payment objects as in GET /api/splitpay/{id}], next_before}`. Newest first. `next_before` is the id to pass as `before` for the next page, or `null` on the last page. An unknown or foreign `before` gives 400 `invalid_cursor`.
+- **GET /api/recipients/recent returns**: 200 `{recipients:[{id, recipient, last_paid_at, last_amount_kobo}]}`, up to 8, newest first, one per person, only completed payments. `recipient` is masked (an Apapo user is only `{recipient_type:"apapo", masked_display_name}`; an outside account shows bank, masked number and name).
+- **Pay again**: send `recipient: {"recent_id": "<id from this list>"}` to preview or execute. The server finds the real recipient itself, so the frontend never needs a phone number or full account number for a past payee. A foreign or unknown `recent_id` gives 404.
+- **Send money to another Apapo user**: look the person up with `GET /api/users/lookup?phone=`, show the masked name, then preview and execute with `recipient: {"apapo_phone": "..."}`. It is the same Split-Pay flow. The money lands in that person's receiving account; their Split-Receive rules (if any) then split it once.
+- **Frontend must**: use this list for the history screen and the "recent" chips on the send screen.
