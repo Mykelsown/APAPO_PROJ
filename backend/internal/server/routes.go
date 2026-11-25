@@ -11,4 +11,5 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/auth/login", s.authLimited(s.handleLogin))
 	mux.HandleFunc("GET /api/me", s.authed(s.handleMe))
 	mux.HandleFunc("PUT /api/me/profile", s.authed(s.handleProfile))
+	mux.HandleFunc("GET /api/banks", s.authed(s.handleBanks))
 }

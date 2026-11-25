@@ -30,6 +30,7 @@ Base URL: the Cube URL in production, `http://localhost:8080` locally. All paths
 | POST | `/api/auth/login` | open | done | Phone and PIN sign in for finished users |
 | GET | `/api/me` | token | done | Profile, onboarding state, receiving account |
 | PUT | `/api/me/profile` | token | done | Change display name |
+| GET | `/api/banks` | token | done | Bank catalogue, with two "coming soon" entries |
 
 ## Common error codes
 

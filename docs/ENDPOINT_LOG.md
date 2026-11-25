@@ -55,3 +55,9 @@ One plain-words report per finished endpoint, newest last. Forward to the fronte
 - **PUT sends**: `{"display_name": "Bola Adeyemi"}`, 1 to 80 characters; extra spaces are trimmed. Returns the same body as GET.
 - **Errors**: 400 `invalid_display_name`, 400 `invalid_json`, 401.
 - **Frontend must**: call GET once after sign in and use `onboarding` to decide which screen comes next (BVN, PIN, link banks, dashboard). Do not poll it.
+
+## GET /api/banks
+
+- **Who may call**: a signed in user.
+- **Returns**: 200 `{banks:[{code, name, supported}]}`. Four supported banks: `apex` Apex Bank, `delta` Delta Trust Bank, `savanna` Savanna Bank, `harbor` Harbor MFB. Two with `supported:false` (`cedar`, `meridian`), shown as "coming soon".
+- **Frontend must**: render a card per bank; disable linking for `supported:false`. Use these `code` values everywhere (not "access" or "gtb").
