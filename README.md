@@ -55,6 +55,7 @@ All settings come from environment variables. See `backend/.env.example`.
 | `PROVIDER` | `mock` | Only `mock` exists |
 | `TRUST_PROXY` | `false` | Trust `X-Forwarded-For` for client IP |
 | `VERSION` | build value or `dev` | Reported by `/api/health` |
+| `DEMO_ENDPOINTS` | `true` | `false` hides `/api/demo/*` (mock helpers) |
 
 ## Deploy on Nobus (Cube)
 

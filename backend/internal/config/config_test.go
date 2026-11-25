@@ -82,3 +82,22 @@ func TestSummaryHidesSecrets(t *testing.T) {
 		t.Fatalf("summary leaks a secret: %s", s)
 	}
 }
+
+func TestDemoEndpointsSetting(t *testing.T) {
+	load := func(v string) (Config, error) {
+		env := map[string]string{}
+		if v != "" {
+			env["DEMO_ENDPOINTS"] = v
+		}
+		return Load(func(k string) (string, bool) { x, ok := env[k]; return x, ok }, "t")
+	}
+	if c, err := load(""); err != nil || !c.DemoEnabled {
+		t.Fatalf("default should be on: %v %v", c.DemoEnabled, err)
+	}
+	if c, err := load("false"); err != nil || c.DemoEnabled {
+		t.Fatalf("false should turn it off: %v %v", c.DemoEnabled, err)
+	}
+	if _, err := load("maybe"); err == nil {
+		t.Fatal("a bad value must be rejected")
+	}
+}

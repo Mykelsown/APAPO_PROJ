@@ -40,18 +40,21 @@ func main() {
 		log.Printf("warning: APP_SECRET is not set, a random one is used; set it so tokens survive restarts")
 	}
 
+	api := server.New(cfg)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	// Background passes: reversal retries and the Split-Receive scan, every 10 seconds.
+	api.World().StartWorkers(ctx, 10*time.Second)
+
 	srv := &http.Server{
 		Addr:              cfg.Addr,
-		Handler:           server.New(cfg).Handler(),
+		Handler:           api.Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       120 * time.Second,
 		MaxHeaderBytes:    1 << 20,
 	}
-
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
 
 	errCh := make(chan error, 1)
 	go func() {
